@@ -7,6 +7,7 @@ Author: Matthew Truscott
 # system imports
 import os
 import time
+import sys
 
 # required packages
 import mcubes

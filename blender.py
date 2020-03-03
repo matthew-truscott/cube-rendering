@@ -3,8 +3,6 @@ import sys
 import os
 import numpy as np
 
-from mathutils import Vector
-
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
 	sys.path.append(dir)
@@ -21,7 +19,7 @@ def create_scene():
 	# add the molecule
 	cube = cr.Cube()
 	# load the molecule
-	cube.load_header('cube/5.cube')
+	cube.load_header('cube/3.cube')
 	#cube.field_settings(roll=True)
 
 	# clean up
@@ -29,15 +27,17 @@ def create_scene():
 
 	# set the scene
 	target = ub.target()
+	scene = ub.get_scene()
 	camera = ub.camera((0, 0, 30), target)
+	scene.camera = camera
 	lamp = ub.lamp((-14, -16, 18), type='POINT', energy=4, color=(1,1,1), target=target)
 	lamp = ub.lamp((13, 15, -10), type='POINT', energy=4, color=(1,1,1), target=target)
-	bpy.data.worlds['World'].horizon_color = (0, 0, 0)
+	bpy.data.worlds['World'].color = (0, 0, 0)
 
 	# TODO make volume a class so that one can successively render objects with persistence
 	#vol = uv.add_volume(cube, update=False)
 	#uv.set_volume_color(vol)
-	iso = uv.add_isosurface(cube, 0.5, update=True)
+	#iso = uv.add_isosurface(cube, 0.5, update=True)
 	#iso = uv.add_isosurface(cube, 0.6, update=True)
 	# for the above (more than one call) need to have smarter filenaming, and
 	# need to change the max allowed reflections for reasonable transparency

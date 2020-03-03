@@ -7,10 +7,10 @@ import numpy as np
 class CPKData():
     def __init__(self):
         self.colors = {
-            1: (4, 4, 4),
-            6: (0.5, 0.5, 0.5),
-            7: (2, 2, 3.56),
-            8: (4, 0, 0)
+            1: (4, 4, 4, 1),
+            6: (0.5, 0.5, 0.5, 1),
+            7: (2, 2, 3.56, 1),
+            8: (4, 0, 0, 1)
         }
 
         with open('ions.json', 'r') as f:
@@ -19,13 +19,11 @@ class CPKData():
         self.atom_scale = 0.24
         self.bond_width = 0.24
 
-def edit_atom_material(molecule, diffuse=0.9, specular=0.0, hardness=50):
+def edit_atom_material(molecule, specular=0.0):
     # in the future, add routines to selectively add different materials to atoms
     for obj in molecule.rendered:
         main_material = obj.data.materials[0]
-        main_material.diffuse_intensity = diffuse
         main_material.specular_intensity = specular
-        main_material.specular_hardness = hardness
 
 def draw_molecule(cube, bonds=False):
     molecule = cube.molecule
@@ -43,7 +41,7 @@ def draw_molecule(cube, bonds=False):
         if molecule.a_species[i] in cpkdata.colors:
             atom_color = cpkdata.colors[molecule.a_species[i]]
         else:
-            atom_color = (0.8, 0.4, 0.4)
+            atom_color = (0.8, 0.4, 0.4, 1.0)
         smat = ub.simpleMaterial(atom_color)
         sobj = bpy.context.active_object
         sobj.data.materials.append(smat)

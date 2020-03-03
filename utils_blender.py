@@ -13,7 +13,8 @@ tau = 2.0 * pi
 
 
 def set_background(color):
-    if 'World' in boy.data.worlds:
+    if 'World' in bpy.data.worlds:
+        breakpoint()
         bpy.data.worlds['World'].horizon_color = color
 
 
@@ -38,40 +39,39 @@ def trackToConstraint(obj, target):
 
 
 def target(origin=(0,0,0)):
-    tar = bpy.data.objects.new('Target', None)
-    bpy.context.scene.objects.link(tar)
-    tar.location = origin
-
-    return tar
-
-
-def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PERSP', ortho_scale=6):
-    camera = bpy.data.cameras.new("Camera")
-    camera.lens = lens
-    camera.clip_start = clip_start
-    camera.clip_end = clip_end
-    camera.type = type
-    if type == 'ORTHO':
-        camera.ortho_scale = ortho_scale
-
-    obj = bpy.data.objects.new("CameraObj", camera)
-    obj.location = origin
-    bpy.context.scene.objects.link(obj)
-    bpy.context.scene.camera = obj
-
-    if target: trackToConstraint(obj, target)
+    bpy.ops.object.empty_add(type="PLAIN_AXES", location=origin)
+    obj = bpy.context.active_object
     return obj
+
+
+def camera(origin, target=None, lens=45, clip_start=0.1, clip_end=200, type='PERSP', ortho_scale=6):
+    bpy.ops.object.camera_add()
+    camera = bpy.context.active_object
+    camera.data.lens = lens
+    camera.data.clip_start = clip_start
+    camera.data.clip_end = clip_end
+    camera.data.type = type
+    camera.location = origin
+    if type == 'ORTHO':
+        camera.data.ortho_scale = ortho_scale
+
+    if target: 
+        trackToConstraint(camera, target)
+    return camera
+
+def get_scene():
+    return bpy.context.scene
 
 
 def lamp(origin, type='POINT', energy=1, color=(1,1,1), target=None):
     print('createLamp called')
-    bpy.ops.object.add(type='LAMP', location=origin)
-    obj = bpy.context.object
-    obj.data.type = type
+    bpy.ops.object.light_add(type=type, location=origin)
+    obj = bpy.context.active_object
     obj.data.energy = energy
     obj.data.color = color
 
-    if target: trackToConstraint(obj, target)
+    if target: 
+        trackToConstraint(obj, target)
     return obj
 
 
@@ -137,17 +137,15 @@ def removeAll(type=None):
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.select_by_type(type=type)
         bpy.ops.object.delete()
+    # broken in blender 2.80
     else:
-        bpy.ops.object.select_by_layer()
-        bpy.ops.object.delete(use_global=False)
-
+        override = bpy.context.copy()
+        override['selected_objects'] = list(bpy.context.scene.objects)
+        bpy.ops.object.delete(override)
 
 def simpleMaterial(diffuse_color):
     mat = bpy.data.materials.new('Material')
-
     # Diffuse
-    mat.diffuse_shader = 'LAMBERT'
-    mat.diffuse_intensity = 0.9
     mat.diffuse_color = diffuse_color
 
     # Specular
